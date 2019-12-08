@@ -7,6 +7,8 @@ const UP = Vector2(0,-1)
 const JUMP_SPEED = GRAVITY * -40
 const WORLD_LIMIT = 6000
 
+var lives = 3
+
 signal animate
 
 func _physics_process(delta):
@@ -36,6 +38,8 @@ func move():
 func jump():
 	if Input.is_action_pressed("jump") && is_on_floor():
 		motion.y += JUMP_SPEED
+		$AudioStreamPlayer.stream = load("res://SFX/jump1.ogg")
+		$AudioStreamPlayer.play()
 
 
 func apply_gravity():
@@ -52,3 +56,13 @@ func apply_gravity():
 
 func end_game():
 	get_tree().change_scene("res://Levels/GameOver.tscn")
+	
+func hurt():
+	position.y -= 1
+	yield(get_tree(), "idle_frame")
+	motion.y += JUMP_SPEED
+	lives -= 1
+	$AudioStreamPlayer.stream = load("res://SFX/pain.ogg")
+	$AudioStreamPlayer.play() 
+	if lives < 0:
+		end_game()
