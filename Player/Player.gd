@@ -6,8 +6,10 @@ const GRAVITY = 100
 const UP = Vector2(0,-1)
 const JUMP_SPEED = GRAVITY * -40
 const WORLD_LIMIT = 6000
+const BOOST_MULTIPLIER = 2
 
-var lives = 3
+#var lives = 3
+#export var boost_multiplier = 2 # or make it const
 
 signal animate
 
@@ -16,7 +18,7 @@ func _physics_process(delta):
 	jump()
 	move()
 	animate()
-	move_and_slide(motion, UP)	
+	move_and_slide(motion, UP)
 
 func animate():
 	## Emit a signal here to be received by the
@@ -38,14 +40,13 @@ func move():
 func jump():
 	if Input.is_action_pressed("jump") && is_on_floor():
 		motion.y += JUMP_SPEED
-		$AudioStreamPlayer.stream = load("res://SFX/jump1.ogg")
-		$AudioStreamPlayer.play()
+		$JumpSFX.play()
 
 
 func apply_gravity():
 	if position.y >= WORLD_LIMIT:
-		end_game()
-	if is_on_floor():
+		get_tree().call_group("Gamestate", "end_game")
+	elif is_on_floor() and motion.y > 0:
 		motion.y = 0
 	elif is_on_ceiling():
 		motion.y = 1
@@ -54,15 +55,15 @@ func apply_gravity():
 		motion.y += GRAVITY
 
 
-func end_game():
-	get_tree().change_scene("res://Levels/GameOver.tscn")
 	
 func hurt():
 	position.y -= 1
 	yield(get_tree(), "idle_frame")
-	motion.y += JUMP_SPEED
-	lives -= 1
-	$AudioStreamPlayer.stream = load("res://SFX/pain.ogg")
-	$AudioStreamPlayer.play() 
-	if lives < 0:
-		end_game()
+	motion.y = JUMP_SPEED
+	$PainSFX.play() 
+
+func boost():
+	print("boosted!")
+	position.y -= 1
+	yield(get_tree(), "idle_frame")
+	motion.y = JUMP_SPEED * BOOST_MULTIPLIER
