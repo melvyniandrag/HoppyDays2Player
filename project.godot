@@ -19,6 +19,11 @@ config/name="HoppyDays"
 run/main_scene="res://Levels/Level1.tscn"
 config/icon="res://icon.png"
 
+[display]
+
+window/size/width=800
+window/size/height=400
+
 [input]
 
 left={
